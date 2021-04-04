@@ -36,10 +36,10 @@ depending upon the python version. Make sure that you are running the command fr
 ### Step 6: To view the attendance after the class
 - Click on Get Attendance button once the class is over
 - Open the attendance.txt file in the directory
-- Attendace can be viewed only after some time. Therefore wait for some time after clicking the Start Class button before clicking on the Get Attendance Button. Let the program decide, whether the students are really present in the class.
+- Attendace can be viewed only after some time. Therefore wait for some time, before clicking on the Get Attendance Button. Let the program decide, whether the students are really present in the class.
 
 # Detailed Documentation will be updated soon. 
-This program was developed as a class assignment. Therefore you can expect lots of bugs. Moreover the program is not optimized too. 
+This program was developed for a class assignment. Therefore you can expect lots of bugs. Moreover the program is not optimized too. 
 
 
 
