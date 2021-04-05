@@ -8,8 +8,7 @@ import numpy
 import os
 import pandas as pd
 
-
-class App:
+class App:    
     def __init__(self,window,video_source=0):
         self.window=window
         self.window.title("Smart Attendance System")
@@ -40,7 +39,7 @@ class App:
         self.btn_snapshot.grid(row=0,column=6,ipadx=10)
         self.btn_snapshot=tk.Button(self.button_frame,text="Quit",command=quit)
         self.btn_snapshot.grid(row=0,column=7,ipadx=10)
-        self.window.iconbitmap("ai.ico")
+        self.window.iconbitmap("resources/icons/ai.ico")
         
 
         self.get_time()
@@ -50,7 +49,13 @@ class App:
     def snapshot(self):
         ret,frame=self.vid.get_frame()
         if ret:
-            cv2.imwrite("image"+time.strftime("%d-%m-%Y-%H-%M-%S")+".jpg",cv2.cvtColor(frame,cv2.COLOR_RGB2BGR))
+            path="snapshots/{}".format(str(dt.datetime.now().date()))
+            if (not os.path.isdir(path)):
+                os.mkdir(path)
+            path="snapshots/{}/{}".format(str(dt.datetime.now().date()),subject_now)
+            if (not os.path.isdir(path)):
+                os.mkdir(path)
+            cv2.imwrite(path+"/image"+time.strftime("%d-%m-%Y-%H-%M-%S")+".jpg",cv2.cvtColor(frame,cv2.COLOR_RGB2BGR))
 
     def start_recording(self):
         self.ok=True
@@ -75,9 +80,17 @@ class App:
 
     def get_attendance(self):
         present_students=[]
-        attendance_sheet=open("attendance.txt","a")
+        path="attendance/{}".format(str(dt.datetime.now().date()))
+        if (not os.path.isdir(path)):
+            os.mkdir(path)
+        path="attendance/{}/{}".format(str(dt.datetime.now().date()),subject_now)
+        if (not os.path.isdir(path)):
+            os.mkdir(path)
+
+
+        attendance_sheet=open(path+"/attendance_"+time.strftime("%d-%m-%Y-%H-%M-%S")+".txt","a")
         attendance_sheet.write("\nAttendance for "+ subject_now + "\n")
-        attendance_sheet.write("Date: " + str(dt.datetime.now()) + "\n-------------------------------------\n")
+        attendance_sheet.write("Timestamp: " + str(dt.datetime.now()) + "\n-------------------------------------\n")
         for k,v in marking.items():
             if v>=100:
                 present_students.append(k)
@@ -102,6 +115,7 @@ class App:
 
     def start_class(self):
         self.train_model()
+        self.get_subject()
         self.update()
 
     def get_time(self):
@@ -117,7 +131,7 @@ class App:
     def get_subject(self):     
         global subject_now
         now=dt.datetime.today().weekday()  #0 for monday, 6 for sunday
-        df = pd.read_excel("timetable.xlsx",engine='openpyxl')
+        df = pd.read_excel("timetable/timetable.xlsx",engine='openpyxl')
         hour_now=int(dt.datetime.now().strftime("%H"))
         if (int(hour_now)>12):
             hour_now=hour_now%12
@@ -126,6 +140,8 @@ class App:
             session="{} to 1".format(int(hour_now))
         today_timetable=df.iloc[now]
         subject_now=today_timetable[session]
+        if (subject_now=='NIL'):
+            subject_now="Free-time"
         self.check_subject=360000
             
         self.window.after(self.check_subject,self.get_subject)
@@ -234,7 +250,11 @@ class VideoCapture:
         }
 
         res=STD_DIMENSIONS[args.res[0]]
-        self.out=cv2.VideoWriter(args.name[0]+'.'+args.type[0],self.fourcc,10,res)
+
+        path="recordings/{}".format(str(dt.datetime.now().date()))
+        if (not os.path.isdir(path)):
+            os.mkdir(path)
+        self.out=cv2.VideoWriter(path+"/"+args.name[0]+time.strftime("_%d-%m-%Y-%H-%M-%S")+'.'+args.type[0],self.fourcc,10,res)
         self.vid.set(3,res[0])
         self.vid.set(4,res[1])
         self.width,self.height=res
@@ -332,7 +352,7 @@ class ElapsedTimeClock:
 
 class CommandLineParse:
     def __init__(self):
-        parser=argparse.ArgumentParser(description="Smart Attendance")
+        parser=argparse.ArgumentParser(description="Smart Attendance System")
         parser.add_argument('--type',nargs=1,default=['avi'],type=str,help="To select video type")
         parser.add_argument('--res',nargs=1,default=['480p'],type=str,help="Resolution")
         parser.add_argument('--name',nargs=1,default=['Output'],type=str,help="Video name")
