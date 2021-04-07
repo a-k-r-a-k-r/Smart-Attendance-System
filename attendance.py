@@ -125,7 +125,7 @@ class App:
                 time_now=time_now%12
             self.get_subject()
         else:
-            pass
+            self.get_subject()
 
             
     def get_subject(self):     
@@ -133,14 +133,21 @@ class App:
         now=dt.datetime.today().weekday()  #0 for monday, 6 for sunday
         df = pd.read_excel("timetable/timetable.xlsx",engine='openpyxl')
         hour_now=int(dt.datetime.now().strftime("%H"))
-        if (int(hour_now)>12):
+        if ((int(hour_now)>12) and (int(hour_now)<=17)):
             hour_now=hour_now%12
             session="{} to {}".format(int(hour_now),int(hour_now)+1)
+            today_timetable=df.iloc[now]
+            subject_now=today_timetable[session]
+        if ((int(hour_now)<12) and (int(hour_now)>=9)):
+            today_timetable=df.iloc[now]
+            subject_now=today_timetable[session] 
         if (int(hour_now)==12):
             session="{} to 1".format(int(hour_now))
-        today_timetable=df.iloc[now]
-        subject_now=today_timetable[session]
-        if (subject_now=='NIL'):
+            today_timetable=df.iloc[now]
+            subject_now=today_timetable[session]      
+        if((int(hour_now)>17) or (int(hour_now)<9)):
+            subject_now="Free-time"
+        if(subject_now=='NIL'):
             subject_now="Free-time"
         self.check_subject=360000
             
